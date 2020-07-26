@@ -139,7 +139,7 @@ namespace GymTrainerWPF
 
             lock (lockObject) 
             {
-                string fileName = DateTime.Now.ToString("dd_MM_HH - mm - ss") + ".csv";
+                string fileName = DateTime.Now.ToString("dd_MM_HH_mm_ss") + ".csv";
                 SkeletonCSVExport skeletonCSVExport = new SkeletonCSVExport();
                 skeletonCSVExport.Write(fileName, jointsList);
             }
