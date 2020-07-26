@@ -3,9 +3,11 @@ using Microsoft.Azure.Kinect.Sensor;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -53,6 +55,9 @@ namespace GymTrainerWPF
         /// </summary>
         private readonly int colorHeight = 0;
 
+        private List<List<Vector3>> jointsList = new List<List<Vector3>>();
+
+        private object lockObject = new object();
         /// <summary>
         /// Status of the application
         /// </summary>
@@ -132,6 +137,13 @@ namespace GymTrainerWPF
         {
             running = false;
 
+            lock (lockObject) 
+            {
+                string fileName = DateTime.Now.ToString("dd_MM_HH - mm - ss") + ".csv";
+                SkeletonCSVExport skeletonCSVExport = new SkeletonCSVExport();
+                skeletonCSVExport.Write(fileName, jointsList);
+            }
+
             if (this.kinect != null)
             {
                 this.kinect.Dispose();
@@ -172,16 +184,21 @@ namespace GymTrainerWPF
                 {
                     if (lastFrame == null)
                         continue;
-                    for (uint i = 0; i < lastFrame.NumberOfBodies; ++i)
+                    lock (lockObject) 
                     {
-                        Skeleton skeleton = lastFrame.GetBodySkeleton(i);
-                        var bodyId = lastFrame.GetBodyId(i);
-                        for (int jointId = 0; jointId < (int)JointId.Count; ++jointId)
+                        List<Vector3> joints = new List<Vector3>();
+                        for (uint i = 0; i < lastFrame.NumberOfBodies; ++i)
                         {
-                            var joint = skeleton.GetJoint(jointId);
-                            Vector3 jointPos = joint.Position / 1000;
+                            Skeleton skeleton = lastFrame.GetBodySkeleton(i);
+                            var bodyId = lastFrame.GetBodyId(i);
+                            for (int jointId = 0; jointId < (int)JointId.Count; ++jointId)
+                            {
+                                var joint = skeleton.GetJoint(jointId);
+                                joints.Add(joint.Position / 1000);
+                            }
                         }
-                    }
+                        jointsList.Add(joints);
+                    }     
                 }
             }
         }
