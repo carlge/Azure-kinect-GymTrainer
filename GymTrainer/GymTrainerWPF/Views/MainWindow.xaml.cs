@@ -71,5 +71,14 @@ namespace GymTrainerWPF
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyname));
             }
         }
+
+        private void ExerciseList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            int index = this.ExerciseList.SelectedIndex;
+            if (index < 0)
+                return;
+            viewModel.OpenExerciseWindow(this.ExerciseList.SelectedIndex);
+        }
     }
 }

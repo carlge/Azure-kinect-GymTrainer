@@ -168,6 +168,12 @@ namespace GymTrainerWPF.ViewModels
             }
         }
 
+
+        public void OpenExerciseWindow(int exerciseIndex) 
+        {
+            
+        }
+
         async Task StartAcquisition() 
         {
             Tracker tracker = Tracker.Create(this._kinect.GetCalibration(), new TrackerConfiguration() { ProcessingMode = TrackerProcessingMode.Gpu, SensorOrientation = SensorOrientation.Default });
