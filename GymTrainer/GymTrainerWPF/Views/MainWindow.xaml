@@ -1,0 +1,58 @@
+﻿<Window x:Class="GymTrainerWPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GymTrainerWPF"
+        mc:Ignorable="d"
+        Title="Gym Trainer Sample" 
+        DataContext="{StaticResource gymTrainerViewModel}"
+        Height="600" Width="1000" >
+    <Window.Resources>
+        <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
+        <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />
+        <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Viewbox Grid.Row="0" HorizontalAlignment="Center">
+            <Grid Name="CompositeImage">
+                <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
+            </Grid>
+        </Viewbox>
+
+        <StackPanel  Grid.Row="1" Orientation="Horizontal">
+            <Button Content="Start" Height="40" Width="100"/>
+            <StatusBar HorizontalAlignment="Left" Name="statusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">
+                <StatusBarItem Content="{Binding StatusText}" FontFamily="Segoe UI" FontSize="18"/>
+            </StatusBar>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2">
+            <ListBox Name="ExerciseList" ItemsSource="{Binding Exercises}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                                 BorderThickness="0" SelectionMode="Single">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="5" BorderThickness="1" BorderBrush="{Binding Color}" Padding="5" >
+                            <Grid Width="275" Height="275" ToolTip="{Binding ExerciseName}">
+                                <StackPanel>
+                                    <Image Source="{Binding ExerciseImageSource}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -5,7 +5,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 
-namespace GymTrainerWPF
+namespace GymTrainerWPF.Model
 {
     public class SkeletonCSVExport
     {
