@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Diagnostics;
 using Frame = Microsoft.Azure.Kinect.BodyTracking.Frame;
 
 namespace GymTrainerWPF
@@ -55,6 +56,8 @@ namespace GymTrainerWPF
         /// </summary>
         private readonly int colorHeight = 0;
 
+        private int imageSerial = 0;
+
         private List<List<Vector3>> jointsList = new List<List<Vector3>>();
 
         private object lockObject = new object();
@@ -84,6 +87,34 @@ namespace GymTrainerWPF
             this.bitmap = new WriteableBitmap(colorWidth, colorHeight, 96.0, 96.0, PixelFormats.Bgra32, null);
 
             this.DataContext = this;
+
+            try
+            {
+                var path = "./img/";
+                // Determine whether the directory exists.
+                if (Directory.Exists(path))
+                {
+                    Console.WriteLine("That path exists already.");
+                    // Deleting all previous image in ./img directory
+                    System.IO.DirectoryInfo directory = new DirectoryInfo("./img/");
+                    foreach (FileInfo file in directory.GetFiles())
+                    {
+                        file.Delete();
+                    }
+                } 
+                else
+                {
+                    // Try to create the directory.
+                    DirectoryInfo di = Directory.CreateDirectory(path);
+                    Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(path));
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The process failed: {0}", e.ToString());
+            }
+            finally { }
 
             InitializeComponent();
         }
@@ -139,9 +170,10 @@ namespace GymTrainerWPF
 
             lock (lockObject) 
             {
-                string fileName = DateTime.Now.ToString("dd_MM_HH_mm_ss") + ".csv";
+                string fileName = DateTime.Now.ToString("dd_MM_HH_mm_ss");
                 SkeletonCSVExport skeletonCSVExport = new SkeletonCSVExport();
-                skeletonCSVExport.Write(fileName, jointsList);
+                skeletonCSVExport.Write(fileName + ".csv", jointsList);
+                Process.Start("ffmpeg.exe", "-framerate 10 -i ./img/%d.jpeg -c:v libx264 -r 30 -pix_fmt yuv420p " + fileName + ".mp4");
             }
 
             if (this.kinect != null)
@@ -165,11 +197,24 @@ namespace GymTrainerWPF
                     var color = capture.Color;
                     var region = new Int32Rect(0, 0, color.WidthPixels, color.HeightPixels);
 
+                   
+
                     unsafe
                     {
                         using (var pin = color.Memory.Pin())
                         {
                             this.bitmap.WritePixels(region, (IntPtr)pin.Pointer, (int)color.Size, color.StrideBytes);
+                            var bmpSource = BitmapSource.Create(color.WidthPixels, color.HeightPixels, 96.0, 96.0, PixelFormats.Bgr32, null, color.Memory.ToArray(), color.StrideBytes);
+
+                            // JpegBitmapEncoder to save BitmapSource to file
+                            // imageSerial is the serial of the sequential image
+                            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                            encoder.Frames.Add(BitmapFrame.Create(bmpSource));
+                            using (var fs = new FileStream("./img/" + (imageSerial++) + ".jpeg", FileMode.Create, FileAccess.Write))
+                            {
+                                encoder.Save(fs);
+                            }
+
                         }
                     }
 
