@@ -1,22 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace TestWithoutKinect
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             AzureStorageOperation azureStorageOperation = new AzureStorageOperation();
-            azureStorageOperation.UploadFile("video", "myFile.txt", @"C:\Users\chhsiao\Documents\myFile.txt");
-            using (var fileStream = System.IO.File.OpenWrite(@"C:\Users\chhsiao\Documents\hackathon\myFile.txt"))
+            await azureStorageOperation.UploadFileAsync("video", "myFile.txt", @"C:\Users\chhsiao\Documents\myFile.txt");
+            using (FileStream file = File.Open(@"C:\Users\chhsiao\Desktop\videoTest.mp4", FileMode.Open))
             {
-                azureStorageOperation.DownloadBlob("video", "myFile.txt", fileStream);
-            }
-            azureStorageOperation.SetBlobMetadata("video", "myFile.txt", new Dictionary<string, string>{ { "hello", "world" } });
-            Dictionary<string, string> dic = azureStorageOperation.GetBlobMetadata("video", "myFile.txt");
-            Console.Out.Write(dic);
 
+                await azureStorageOperation.UploadStreamAsync("video", "videoTest.mp4", file);
+            }
+
+            using (var fileStream = File.OpenWrite(@"C:\Users\chhsiao\Documents\hackathon\myFile.txt"))
+            {
+               await azureStorageOperation.DownloadBlobAsync("video", "myFile.txt", fileStream);
+
+            }
+            await azureStorageOperation.SetBlobMetadataAsync("video", "myFile.txt", new Dictionary<string, string> { { "hello", "world" } });
         }
     }
 }

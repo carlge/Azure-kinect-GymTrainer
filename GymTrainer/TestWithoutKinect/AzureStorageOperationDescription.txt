@@ -1,0 +1,3 @@
+﻿storageAccountName: kinectgymstorage
+containerName: video, skeleton, metadata
+SAS Token is valid until 8/1, copy paste from oneNote

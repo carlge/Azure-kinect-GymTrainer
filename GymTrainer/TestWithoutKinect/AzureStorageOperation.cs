@@ -3,15 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TestWithoutKinect
 {
     public class AzureStorageOperation
     {
-        const string sasToken = "?sv=2019-12-12&ss=bfqt&srt=sco&sp=rwdlacupx&se=2020-08-02T05:18:50Z&st=2020-07-27T21:18:50Z&spr=https&sig=dYd8En18mj%2ByfBJgAhHIqPuKzsWjLbrS4opFFfiA8Ng%3D";
+        // Copy paste the SasToken value in oneNote
+        const string sasToken = "";
         const string storageAccountName = "kinectgymstorage";
 
-        public static string BuildUriString(
+        /// <summary>
+        /// Get Uri String for account/container/blob
+        /// </summary>
+        /// <param name="accountName"></param>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <param name="requireInsecureProtocol"></param>
+        /// <param name="emulatorServer"></param>
+        /// <returns>
+        /// UriString for blob Address
+        /// </returns>
+        public string BuildUriString(
            string accountName,
            string containerName,
            string blobName,
@@ -49,6 +63,15 @@ namespace TestWithoutKinect
             return $"{rootUri}/{containerName}/{blobName}" + sasToken;
         }
 
+        /// <summary>
+        /// Builds a root URI to an account in Azure Storage.
+        /// </summary>
+        /// <param name="accountName"></param>
+        /// <param name="requireInsecureProtocol"></param>
+        /// <param name="emulatorServer"></param>
+        /// <returns>
+        /// A string-URI address to an Azure Storage blob.
+        /// </returns>
         public static string BuildAccountRootUriString(
           string accountName,
           bool requireInsecureProtocol = false,
@@ -60,40 +83,77 @@ namespace TestWithoutKinect
                 : $@"http://{emulatorServer}:10000/{accountName}";
         }
 
-        public CloudBlockBlob GetCloudBlob(string containerName, string blobName)
+        /// <summary>
+        /// Get CloudBlockBlob instance given containerName and blobName
+        /// </summary>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <returns>
+        /// CloudBlockBlob instance
+        /// </returns>
+        public CloudBlockBlob GetCloudBlob(
+            string containerName,
+            string blobName)
         {
             string uri = BuildUriString(storageAccountName, containerName, blobName);
             var cloudBlockBlob = new CloudBlockBlob(new Uri(uri));
             return cloudBlockBlob;
         }
 
-        public void UploadFile(string containerName, string blobName, string localFilePath)
+        /// <summary>
+        /// Uploads a local file to the specified blob address.
+        /// </summary>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <param name="localFilePath"></param>
+       /// <param name="cancellationToken">
+        /// Optionally, a cancellation token to cancel the operation.
+        /// </param>
+        public async Task UploadFileAsync(
+            string containerName,
+            string blobName,
+            string localFilePath,
+            CancellationToken cancellationToken = default)
         {
             CloudBlockBlob cloudBlockBlob = GetCloudBlob(containerName, blobName);
-            cloudBlockBlob.UploadFromFile(localFilePath);
-        }
-        public void UploadStream(string containerName, string blobName, Stream sourceStream)
-        {
-            CloudBlockBlob cloudBlockBlob = GetCloudBlob(containerName, blobName);
-            cloudBlockBlob.UploadFromStream(sourceStream);
-        }
-        private CloudBlobContainer GetCloudBlobContainer(string azureStorageContainerName)
-        {
-            
-            if (string.IsNullOrEmpty(azureStorageContainerName))
-            {
-                throw new ArgumentNullException(nameof(azureStorageContainerName));
-            }
-            string uri = BuildUriString(storageAccountName, azureStorageContainerName, "");
-            var cloudBlockBlob = new CloudBlobContainer(new Uri(uri));
 
-            return cloudBlockBlob;
+            await cloudBlockBlob.UploadFromFileAsync(localFilePath, cancellationToken).ConfigureAwait(false);
         }
-        
-        public void DownloadBlob(
+
+        /// <summary>
+        /// Uploads a stream of data to the specified blob address.
+        /// </summary>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <param name="sourceStream"></param> 
+        /// <param name="cancellationToken">
+        /// Optionally, a cancellation token to cancel the operation.
+        /// </param>
+        public async Task UploadStreamAsync(
+            string containerName,
+            string blobName,
+            Stream sourceStream,
+            CancellationToken cancellationToken = default)
+        {
+            CloudBlockBlob cloudBlockBlob = GetCloudBlob(containerName, blobName);
+
+            await cloudBlockBlob.UploadFromStreamAsync(sourceStream, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Downloads a blob to a target stream given it's container nameand blob name.
+        /// </summary>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <param name="destinationStream"></param>
+        /// <param name="cancellationToken">
+        /// Optionally, a cancellation token to cancel the operation.
+        /// </param>
+        public async Task DownloadBlobAsync(
           string containerName,
           string blobName,
-          Stream destinationStream)
+          Stream destinationStream,
+          CancellationToken cancellationToken = default)
         {
 
             if (destinationStream is null)
@@ -106,15 +166,27 @@ namespace TestWithoutKinect
                 throw new ArgumentException("The destination stream is not writable.", nameof(destinationStream));
             }
             CloudBlockBlob cloudBlockBlob = GetCloudBlob(containerName, blobName);
-            cloudBlockBlob.DownloadToStream(destinationStream);
+            await cloudBlockBlob.DownloadToStreamAsync(destinationStream, cancellationToken).ConfigureAwait(false);
         }
 
-        public void SetBlobMetadata(
+        /// <summary>
+        ///  Sets an Azure Storage blob's metadata.
+        /// </summary>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <param name="metadata"></param>
+        /// <param name="deleteExistingMetadata"></param>
+        /// <param name="throwOnNullOrEmptyValues"></param>
+        /// <param name="cancellationToken">
+        /// Optionally, a cancellation token to cancel the operation.
+        /// </param>
+        public async Task SetBlobMetadataAsync(
             string containerName,
             string blobName,
             IDictionary<string, string> metadata,
             bool deleteExistingMetadata = false,
-            bool throwOnNullOrEmptyValues = true)
+            bool throwOnNullOrEmptyValues = true,
+            CancellationToken cancellationToken = default)
         {
             if (metadata is null)
             {
@@ -122,6 +194,8 @@ namespace TestWithoutKinect
             }
 
             CloudBlockBlob cloudBlockBlob = GetCloudBlob(containerName, blobName);
+
+            await cloudBlockBlob.FetchAttributesAsync(cancellationToken).ConfigureAwait(false);
 
             if (deleteExistingMetadata)
             {
@@ -148,14 +222,28 @@ namespace TestWithoutKinect
                 cloudBlockBlob.Metadata[metadataKeyAndValue.Key] = metadataKeyAndValue.Value;
             }
 
-            cloudBlockBlob.SetMetadata();
+            await cloudBlockBlob.SetMetadataAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public Dictionary<string, string> GetBlobMetadata(string containerName, string blobName)
+        /// <summary>
+        /// Gets an Azure Storage blob's metadata.
+        /// </summary>
+        /// <param name="containerName"></param>
+        /// <param name="blobName"></param>
+        /// <param name="cancellationToken">
+        /// Optionally, a cancellation token to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// Blob's metadata
+        /// </returns>
+        public async Task<Dictionary<string, string>> GetBlobMetadataAsync(
+            string containerName,
+            string blobName,
+            CancellationToken cancellationToken = default)
         {
             CloudBlockBlob cloudBlockBlob = GetCloudBlob(containerName, blobName);
 
-            cloudBlockBlob.FetchAttributes();
+            await cloudBlockBlob.FetchAttributesAsync(cancellationToken).ConfigureAwait(false);
 
             return cloudBlockBlob.Metadata.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
