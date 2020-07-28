@@ -8,7 +8,7 @@ namespace TestWithoutKinect
 {
     public class AzureStorageOperation
     {
-        const string sasToken = "?sv=2019-12-12&ss=bfqt&srt=sco&sp=rwdlacupx&se=2020-08-02T05:18:50Z&st=2020-07-27T21:18:50Z&spr=https&sig=dYd8En18mj%2ByfBJgAhHIqPuKzsWjLbrS4opFFfiA8Ng%3D";
+        const string sasToken = "";
         const string storageAccountName = "kinectgymstorage";
 
         public static string BuildUriString(
