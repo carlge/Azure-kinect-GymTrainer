@@ -140,8 +140,9 @@ namespace GymTrainerWPF.ViewModels
                                 }
                                 else if((SystemMode == "Prepared"))
                                 {
-                                    WorkoutWarning = exerciseMotion.analyze(skeleton);
-                                    if (WorkoutWarning == "rapdone") 
+                                    var analysisResult = exerciseMotion.analyze(skeleton);
+                                    WorkoutWarning = analysisResult.WarningMessage;
+                                    if (analysisResult.Status == RapStatus.Ready) 
                                     {
                                         CurrentReps++;
                                     }

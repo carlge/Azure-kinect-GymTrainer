@@ -11,6 +11,19 @@ namespace GymTrainerWPF.Models
         string IsPrepared(Skeleton skeleton);
 
         //return success if prepared, otherwise return warning
-        string analyze(Skeleton skeleton);
+        AnalysisResult analyze(Skeleton skeleton);
+    }
+
+    public enum RapStatus
+    {
+        NotReady = 0,
+        Ready = 1
+    }
+
+    public class AnalysisResult
+    {
+        public string WarningMessage { get; set; }
+
+        public RapStatus Status { get; set; }
     }
 }

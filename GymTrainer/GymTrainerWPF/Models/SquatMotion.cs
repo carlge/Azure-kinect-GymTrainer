@@ -33,23 +33,20 @@ namespace GymTrainerWPF.Models
             var heuristic_1 = shoulderLeftRightDistance - delta; // min heuristic value that is allowed
             var heuristic_2 = shoulderLeftRightDistance + delta;
 
-
-            var val = Math.Abs(shoulderLeftRightDistance - ankleLeftRightDistance);
-
-            if (val < heuristic_1)
+            if (ankleLeftRightDistance < heuristic_1)
             {
                 return "Please widen your stance";
             }
-            else if (val > heuristic_2)
+            else if (ankleLeftRightDistance > heuristic_2)
             {
                 return "Please narrow your stance";
             }
             return "success";
         }
 
-        public string analyze(Skeleton skeleton)
+        public AnalysisResult analyze(Skeleton skeleton)
         {
-
+            AnalysisResult analysisResult = new AnalysisResult() { WarningMessage = "success", Status = RapStatus.NotReady };
             // For a complete rep, the knee-hip and ankle-knee angle should start close to 180 deg and reach to about 90+-10 degrees
             // calculate the dot product of knee-hip and ankle-knee 1-2
             Vector3 rightKneeHip = Vector3.Subtract(jointsPos[0], jointsPos[2]);
@@ -61,13 +58,13 @@ namespace GymTrainerWPF.Models
 
             if (leftAngle < 80 || rightAngle < 80)
             {
-                return "Too Shallow";
+                analysisResult.WarningMessage =  "Too Shallow";
             }
             else if (leftAngle > 100 || rightAngle > 100)
             {
-                return "Too Deep";
+                analysisResult.WarningMessage = "Too Deep";
             }
-            return "Good Squat";
+            return analysisResult;
         }
 
         public const float kEpsilonNormalSqrt = 1e-15F;

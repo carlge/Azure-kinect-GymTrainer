@@ -32,8 +32,9 @@ namespace GymTrainerWPF.Models
 
 
 
-        public string analyze(Skeleton skeleton) 
+        public AnalysisResult analyze(Skeleton skeleton) 
         {
+            AnalysisResult analysisResult = new AnalysisResult() {WarningMessage = "success", Status= RapStatus.NotReady };
             List<Vector3> jointsPos = new List<Vector3>();
             foreach (var jointId in keyJoints)
             {
@@ -53,7 +54,7 @@ namespace GymTrainerWPF.Models
             float angleSN = Angle(shoulder2Elbow, neck2Pelvis);
 
             if (angleSN > 20)
-                return "Please ensure your elbows remain stationary and to the sides of your body";
+                analysisResult.WarningMessage = "Please ensure your elbows remain stationary and to the sides of your body";
 
             float angleEW = Angle(elbow2Wrist, shoulder2Elbow);
             JointsQueue.Enqueue(angleEW);
@@ -68,10 +69,10 @@ namespace GymTrainerWPF.Models
             if (angleEW < 80 && angleEW > JointsQueue.Average() && status != 1) 
             {
                 status = 1;
-                return "rapdone";
+                analysisResult.Status = RapStatus.Ready;
             }
 
-            return "success";
+            return analysisResult;
         }
 
 

@@ -268,7 +268,7 @@ namespace GymTrainerWPF.ViewModels
             else if (ExerciseIndex == 1)
             {
                 VideoSource = new Uri("Videos/squat.mp4", UriKind.Relative);
-                exerciseMotion = new BicepCurlMotion();
+                exerciseMotion = new SquatMotion();
             }
         }
     }
