@@ -50,6 +50,8 @@ namespace GymTrainerWPF.ViewModels
 
         private object lockObject = new object();
 
+        private Uri _videoSource = new Uri("Videos/bicepcurl.mp4", UriKind.Relative);
+
         IExerciseMotion exerciseMotion = null;
         /// <summary>
         /// Gets the bitmap to display
@@ -170,10 +172,22 @@ namespace GymTrainerWPF.ViewModels
 
 
 
-        public string VideoSource
+        public Uri VideoSource
         {
-            get; set;
-        } = "Videos/bicepcurl.mp4";
+            get
+            {
+                return this._videoSource;
+            }
+
+            set
+            {
+                if (this._videoSource != value)
+                {
+                    this._videoSource = value;
+                    OnPropertyChanged("VideoSource");
+                }
+            }
+        } 
 
         /// <summary>
         /// Gets/sets collection of cameras
@@ -248,6 +262,12 @@ namespace GymTrainerWPF.ViewModels
         {
             if (ExerciseIndex == 0) 
             {
+                VideoSource = new Uri("Videos/bicepcurl.mp4", UriKind.Relative);
+                exerciseMotion = new BicepCurlMotion();
+            }
+            else if (ExerciseIndex == 1)
+            {
+                VideoSource = new Uri("Videos/squat.mp4", UriKind.Relative);
                 exerciseMotion = new BicepCurlMotion();
             }
         }
