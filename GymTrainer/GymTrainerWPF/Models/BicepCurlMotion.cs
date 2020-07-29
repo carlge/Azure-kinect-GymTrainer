@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Linq;
 
 namespace GymTrainerWPF.Models
 {
@@ -11,8 +12,13 @@ namespace GymTrainerWPF.Models
         //0 Pelvis,1 Neck,2 ShoulderRight,3 ElbowRight,4 WristRight,5 HipLeft,6 HipRight
         List<int> keyJoints = new List<int> {0, 3, 12, 13, 14, 18, 22};
 
+        Queue<float> JointsQueue = new Queue<float>();
+        int status = - 1;//-1 reset, 0 up, 1 down
+
         public string IsPrepared(Skeleton skeleton)
         {
+            JointsQueue.Clear();
+            status = -1;
             foreach (var jointId in keyJoints)
             {
                 var joint = skeleton.GetJoint(jointId);
@@ -23,6 +29,8 @@ namespace GymTrainerWPF.Models
             }
             return "success";
         }
+
+
 
         public string analyze(Skeleton skeleton) 
         {
@@ -40,11 +48,28 @@ namespace GymTrainerWPF.Models
             //Norm
             Vector3 shoulder2Elbow = Vector3.Subtract(jointsPos[3], jointsPos[2]);
             Vector3 neck2Pelvis = Vector3.Subtract(jointsPos[0], jointsPos[1]);
+            Vector3 elbow2Wrist = Vector3.Subtract(jointsPos[3], jointsPos[4]);
 
             float angleSN = Angle(shoulder2Elbow, neck2Pelvis);
 
             if (angleSN > 20)
                 return "Please ensure your elbows remain stationary and to the sides of your body";
+
+            float angleEW = Angle(elbow2Wrist, shoulder2Elbow);
+            JointsQueue.Enqueue(angleEW);
+            if (JointsQueue.Count > 5)
+                JointsQueue.Dequeue();
+
+            if (angleEW < 80 && angleEW < JointsQueue.Average() && status != 0)
+            {
+                status = 0;
+            }
+
+            if (angleEW < 80 && angleEW > JointsQueue.Average() && status != 1) 
+            {
+                status = 1;
+                return "rapdone";
+            }
 
             return "success";
         }

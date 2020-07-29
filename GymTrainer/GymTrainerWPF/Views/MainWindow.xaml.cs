@@ -101,7 +101,8 @@ namespace GymTrainerWPF
             {
                 VideoControl.Position = TimeSpan.Zero;
                 VideoControl.Play();
-                viewModel.CurrentReps++;
+                if (!viewModel.Running)
+                    viewModel.CurrentReps++;
                 return;
             }
             StopMedia();
@@ -143,7 +144,8 @@ namespace GymTrainerWPF
             var viewModel = this.DataContext as GymTrainerViewModel;
             VideoControl.Play();
             MediaStartBtn.Content = "Stop";
-            viewModel.CurrentReps++;
+            if (!viewModel.Running)
+                viewModel.CurrentReps++;
         }
 
         private void MediaPauseBtn_Click(object sender, RoutedEventArgs e)
