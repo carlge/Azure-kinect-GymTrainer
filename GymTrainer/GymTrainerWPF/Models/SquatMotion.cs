@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Kinect.BodyTracking;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Numerics;
 
 namespace GymTrainerWPF.Models
 {
@@ -24,22 +24,27 @@ namespace GymTrainerWPF.Models
         public string analyze(Skeleton skeleton)
         {
             // Read from file
-            using (var reader = new StreamReader(@"C:\Users\chhsiao\source\repos\Azure-kinect-GymTrainer\Data Analysis\Data\bodyweight_squat_side_view.csv"))
+            List<Vector3> jointsPos = new List<Vector3>();
+            foreach (var jointId in keyJoints)
             {
-                List<string> listA = new List<string>();
-                List<string> listB = new List<string>();
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    var values = line.Split(';');
-
-                    listA.Add(values[0]);
-                    listB.Add(values[1]);
-                }
+                var joint = skeleton.GetJoint(jointId);
+                jointsPos.Add(joint.Position / 1000);
             }
 
-            // Extract out the body points we need
+            var shoulderLeftRightDistance = Vector3.Distance(jointsPos[6], jointsPos[7]);
+            // distance of shoulderLeftRightDistance
+            // distance of ankleLeftRightDistance
+            var delta = shoulderLeftRightDistance * .10;
+
+           
+
+
+
+            //Norm
+
+
             return "success";
+
         }
     }
 }
