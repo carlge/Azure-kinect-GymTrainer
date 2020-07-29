@@ -43,6 +43,8 @@ namespace GymTrainerWPF
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            viewModel.TurnOnMedia += StartMedia;
         }
 
         /// <summary>
@@ -55,9 +57,9 @@ namespace GymTrainerWPF
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        private async void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-      
+
         }
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace GymTrainerWPF
             int index = this.ExerciseList.SelectedIndex;
             if (index < 0)
                 return;
-            //viewModel.SelectExercise(this.ExerciseList.SelectedIndex);
+            viewModel.SelectExercise(this.ExerciseList.SelectedIndex);
         }
 
         private void VideoControl_MediaOpened(object sender, RoutedEventArgs e)
@@ -90,24 +92,51 @@ namespace GymTrainerWPF
 
         private void VideoControl_MediaEnded(object sender, RoutedEventArgs e)
         {
-            VideoControl.Stop();
-            MediaStartBtn.Content = "Start";
-            MediaPauseBtn.Content = "Pause";
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            if (viewModel.CurrentReps < viewModel.TotalReps)
+            {
+                VideoControl.Position = TimeSpan.Zero;
+                VideoControl.Play();
+                viewModel.CurrentReps++;
+                return;
+            }
+            StopMedia();
         }
 
         private void MediaStartBtn_Click(object sender, RoutedEventArgs e)
         {
+            var viewModel = this.DataContext as GymTrainerViewModel;
             if ((string)MediaStartBtn.Content == "Start")
             {
-                VideoControl.Play();
-                MediaStartBtn.Content = "Stop";
+                if (viewModel.Running)
+                {
+                    viewModel.SystemMode = "Preparing";
+                    return;
+                }
+                StartMedia();
             }
-            else 
+            else
             {
-                VideoControl.Stop();
-                MediaStartBtn.Content = "Start";
-                MediaPauseBtn.Content = "Pause";
+                StopMedia();
             }
+        }
+        private void StopMedia()
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            VideoControl.Stop();
+            MediaStartBtn.Content = "Start";
+            MediaPauseBtn.Content = "Pause";
+            viewModel.CurrentReps = 0;
+            viewModel.SystemMode = "Free";
+        }
+
+        private void StartMedia()
+        {
+            Thread.Sleep(1000);
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            VideoControl.Play();
+            MediaStartBtn.Content = "Stop";
+            viewModel.CurrentReps++;
         }
 
         private void MediaPauseBtn_Click(object sender, RoutedEventArgs e)
@@ -130,12 +159,10 @@ namespace GymTrainerWPF
             await viewModel.OpenCamera();
         }
 
-        private void CameraToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        private async void CameraToggleButton_Unchecked(object sender, RoutedEventArgs e)
         {
             var viewModel = this.DataContext as GymTrainerViewModel;
-            viewModel.CloseCamera();
+            await viewModel.CloseCamera();
         }
-
-
     }
 }

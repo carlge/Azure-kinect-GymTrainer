@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Gym Trainer Sample" 
         DataContext="{StaticResource gymTrainerViewModel}"
-        Height="600" Width="1200" 
+        Height="800" Width="1200" 
         >
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
@@ -51,6 +51,14 @@
             <Border Margin="5" BorderThickness="1" Padding="20" Grid.Row="0">
                 <MediaElement Name="VideoControl" Width="400" LoadedBehavior="Manual" UnloadedBehavior="Stop" Stretch="Fill" MediaOpened="VideoControl_MediaOpened" MediaEnded="VideoControl_MediaEnded" Source="{Binding VideoSource}" />
             </Border>
+            <Border Height="50" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="25" BorderThickness="1" Grid.Row="0" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Reps : "  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CurrentReps}" Width ="30"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="/"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding TotalReps}" Width ="30"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="1">
                 <Button x:Name="MediaStartBtn" Content="Start" Height="40" Width="100" Click="MediaStartBtn_Click"/>
                 <Button x:Name="MediaPauseBtn" Content="Pause" Height="40" Width="100" Margin="20, 0, 0, 0" Click="MediaPauseBtn_Click" />
@@ -59,38 +67,56 @@
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0">
-                <StatusBar HorizontalAlignment="Left" Name="ExerciseStatusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">
-                    <StatusBarItem Content="{Binding WorkOutTime}" FontFamily="Segoe UI" FontSize="18" Margin="5"/>
-                    <StatusBarItem Content="{Binding RepsCount}" FontFamily="Segoe UI" FontSize="18" Margin="5"/>
-                </StatusBar>
-                
-            </StackPanel>
-
-            <StackPanel Grid.Row="1" >
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,50,0,0">
+            <Border Margin="5" Padding="20" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="top" Grid.Row="0" >
+                <Viewbox>
+                    <Grid Name="CompositeImage">
+                        <Image Source="{Binding ImageSource}" Stretch="Fill" />
+                    </Grid>
+                </Viewbox>
+            </Border>
+            <Border Margin="25" BorderThickness="1" VerticalAlignment="top" Grid.Row="0" >
+                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="top" HorizontalAlignment="Right">
                     <Border Height="50">
                         <TextBlock Text="Camera"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
                     </Border>
                     <ToggleButton Name="CameraToggleButton" Width="100" Height="50" Checked="CameraToggleButton_Checked" Unchecked="CameraToggleButton_Unchecked"/>
                 </StackPanel>
-                <Viewbox HorizontalAlignment="Center">
-                    <Grid Name="CompositeImage">
-                        <Image Source="{Binding ImageSource}" Stretch="Fill" />
-                    </Grid>
-                </Viewbox>
-            </StackPanel>
-            
+            </Border>
 
-            <StackPanel  Grid.Row="2" Orientation="Horizontal">
-                <StatusBar HorizontalAlignment="Left" Name="statusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">
-                    <StatusBarItem Content="{Binding StatusText}" FontFamily="Segoe UI" FontSize="18"/>
-                </StatusBar>
+            <StackPanel Grid.Row="1">
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding StatusText}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="System Mode: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding SystemMode}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Workout Warning: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding WorkoutWarning}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="red"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="WorkOut Time: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding WorkOutTime}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Calories: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding WorkOutCalories}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Grid>
      </Grid>

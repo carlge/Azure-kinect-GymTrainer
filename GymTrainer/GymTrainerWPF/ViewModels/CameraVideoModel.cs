@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -26,13 +27,14 @@ namespace GymTrainerWPF.ViewModels
         /// Status of the application
         /// </summary>
 
-        private bool running = false;
+        public bool Running { get; set; } = false;
+
+        private Task acqTask = null;
+
+        public Action TurnOnMedia;
 
         public async Task OpenCamera()
         {
-            // Open the default device
-            this._kinect = Device.Open();
-
             // Configure camera modes
             this._kinect.StartCameras(new DeviceConfiguration
             {
@@ -43,26 +45,29 @@ namespace GymTrainerWPF.ViewModels
                 SynchronizedImagesOnly = true
             });
 
-            await StartAcquisition();
+            acqTask = StartAcquisition();
+            await acqTask;
         }
 
-        public void CloseCamera()
+        public async Task CloseCamera()
         {
-            if (this._kinect != null)
+            Running = false;
+            while (!acqTask.IsCompleted) 
             {
-                this._kinect.Dispose();
+                await Task.Delay(200);
             }
+            this._kinect.StopCameras();
         }
 
         async Task StartAcquisition()
         {
-            if (running)
+            if (Running)
                 return;
 
-            running = true;
+            Running = true;
             Tracker tracker = Tracker.Create(this._kinect.GetCalibration(), new TrackerConfiguration() { ProcessingMode = TrackerProcessingMode.Gpu, SensorOrientation = SensorOrientation.Default });
 
-            while (running)
+            while (Running)
             {
                 using (Capture capture = await Task.Run(() => { return this._kinect.GetCapture(); }))
                 {
@@ -107,21 +112,49 @@ namespace GymTrainerWPF.ViewModels
                         continue;
                     lock (lockObject)
                     {
-                        List<Vector3> joints = new List<Vector3>();
+                        if (lastFrame.NumberOfBodies == 0) 
+                        {
+                            WorkoutWarning = "Cannot be detected by camera!";
+                            continue;
+                        }
+                        //List<Vector3> joints = new List<Vector3>();
                         for (uint i = 0; i < lastFrame.NumberOfBodies; ++i)
                         {
                             Skeleton skeleton = lastFrame.GetBodySkeleton(i);
                             var bodyId = lastFrame.GetBodyId(i);
-                            for (int jointId = 0; jointId < (int)JointId.Count; ++jointId)
+                            if (exerciseMotion != null) 
                             {
-                                var joint = skeleton.GetJoint(jointId);
-                                joints.Add(joint.Position / 1000);
+                                if (SystemMode == "Preparing")
+                                {
+                                    string result = exerciseMotion.IsPrepared(skeleton);
+                                    if (result != "success")
+                                    {
+                                        WorkoutWarning = result;
+                                    }
+                                    else
+                                    {
+                                        WorkoutWarning = "Perfect!!!";
+                                        SystemMode = "Prepared";
+                                        TurnOnMedia();
+                                    }
+                                }
+                                else if((SystemMode == "Prepared"))
+                                {
+                                    
+                                }
+                                
                             }
+                            //for (int jointId = 0; jointId < (int)JointId.Count; ++jointId)
+                            //{
+                            //    var joint = skeleton.GetJoint(jointId);
+                            //    joints.Add(joint.Position / 1000);
+                            //}
                         }
-                        jointsList.Add(joints);
+                        //jointsList.Add(joints);
                     }
                 }
             }
+            tracker.Shutdown();
         }
     }
 }

@@ -33,10 +33,12 @@ namespace GymTrainerWPF.ViewModels
         /// </summary>
         private string _statusText = null;
 
-        private string _workoutTime = "Workout Time : 00:00:00";
+        private string _workoutTime = "00:00:00";
 
-        private string _repsCount = "Reps : 00 / 15";
+        private string _systemMode = "Free";
 
+        private int _totalReps = 15;
+        private int _currentReps = 0;
         /// <summary>
         /// Bitmap to display
         /// </summary>
@@ -44,11 +46,13 @@ namespace GymTrainerWPF.ViewModels
 
         private int imageSerial = 0;
 
-        private List<List<Vector3>> jointsList = new List<List<Vector3>>();
+        private string _workoutWarning = "Cannot be detected by camera!";
+
+        //private List<List<Vector3>> jointsList = new List<List<Vector3>>();
 
         private object lockObject = new object();
-        
 
+        IExerciseMotion exerciseMotion = null;
         /// <summary>
         /// Gets the bitmap to display
         /// </summary>
@@ -80,6 +84,23 @@ namespace GymTrainerWPF.ViewModels
             }
         }
 
+        public string SystemMode
+        {
+            get
+            {
+                return this._systemMode;
+            }
+
+            set
+            {
+                if (this._systemMode != value)
+                {
+                    this._systemMode = value;
+                    OnPropertyChanged("SystemMode");
+                }
+            }
+        }
+
         public string WorkOutTime
         {
             get
@@ -97,19 +118,54 @@ namespace GymTrainerWPF.ViewModels
             }
         }
 
-        public string RepsCount
+        public string WorkoutWarning
         {
             get
             {
-                return this._repsCount;
+                return this._workoutWarning;
             }
 
             set
             {
-                if (this._repsCount != value)
+                if (this._workoutWarning != value)
                 {
-                    this._repsCount = value;
-                    OnPropertyChanged("RepsCount");
+                    this._workoutWarning = value;
+                    OnPropertyChanged("WorkoutWarning");
+                }
+            }
+        }
+        
+
+        public int CurrentReps
+        {
+            get
+            {
+                return this._currentReps;
+            }
+
+            set
+            {
+                if (this._currentReps != value)
+                {
+                    this._currentReps = value;
+                    OnPropertyChanged("CurrentReps");
+                }
+            }
+        }
+
+        public int TotalReps
+        {
+            get
+            {
+                return this._totalReps;
+            }
+
+            set
+            {
+                if (this._totalReps != value)
+                {
+                    this._totalReps = value;
+                    OnPropertyChanged("TotalReps");
                 }
             }
         }
@@ -131,11 +187,21 @@ namespace GymTrainerWPF.ViewModels
 
         public GymTrainerViewModel() 
         {
+            // Open the default device
+            this._kinect = Device.Open();
             this._bitmap = new WriteableBitmap(_colorWidth, _colorHeight, 96.0, 96.0, PixelFormats.Bgra32, null);
             var exercises = Configuration.LoadExercise();
             foreach (var exercise in exercises)
             {
                 Exercises.Add(exercise);
+            }
+        }
+
+        ~GymTrainerViewModel() 
+        {
+            if (this._kinect != null)
+            {
+                this._kinect.Dispose();
             }
         }
 
@@ -175,8 +241,16 @@ namespace GymTrainerWPF.ViewModels
             {
                 string fileName = DateTime.Now.ToString("dd_MM_HH_mm_ss");
                 SkeletonCSVExport skeletonCSVExport = new SkeletonCSVExport();
-                skeletonCSVExport.Write(fileName + ".csv", jointsList);
+                //skeletonCSVExport.Write(fileName + ".csv", jointsList);
                 Process.Start("ffmpeg.exe", "-framerate 10 -i ./img/%d.jpeg -c:v libx264 -r 30 -pix_fmt yuv420p " + fileName + ".mp4");
+            }
+        }
+
+        public void SelectExercise(int ExerciseIndex) 
+        {
+            if (ExerciseIndex == 0) 
+            {
+                exerciseMotion = new BicepCurlMotion();
             }
         }
     }
