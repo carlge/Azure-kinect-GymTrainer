@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Gym Trainer Sample" 
         DataContext="{StaticResource gymTrainerViewModel}"
-        Height="800" Width="1200" 
+        Height="600" Width="1200" 
         >
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
@@ -48,8 +48,8 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Border Margin="5" BorderThickness="1" Padding="50" Grid.Row="0">
-                <MediaElement Name="VideoControl" Width="600" LoadedBehavior="Manual" UnloadedBehavior="Stop" Stretch="Fill" MediaOpened="VideoControl_MediaOpened" MediaEnded="VideoControl_MediaEnded" Source="{Binding VideoSource}" />
+            <Border Margin="5" BorderThickness="1" Padding="20" Grid.Row="0">
+                <MediaElement Name="VideoControl" Width="400" LoadedBehavior="Manual" UnloadedBehavior="Stop" Stretch="Fill" MediaOpened="VideoControl_MediaOpened" MediaEnded="VideoControl_MediaEnded" Source="{Binding VideoSource}" />
             </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="1">
                 <Button x:Name="MediaStartBtn" Content="Start" Height="40" Width="100" Click="MediaStartBtn_Click"/>
@@ -69,13 +69,23 @@
                     <StatusBarItem Content="{Binding WorkOutTime}" FontFamily="Segoe UI" FontSize="18" Margin="5"/>
                     <StatusBarItem Content="{Binding RepsCount}" FontFamily="Segoe UI" FontSize="18" Margin="5"/>
                 </StatusBar>
+                
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" >
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,50,0,0">
+                    <Border Height="50">
+                        <TextBlock Text="Camera"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    </Border>
+                    <ToggleButton Name="CameraToggleButton" Width="100" Height="50" Checked="CameraToggleButton_Checked" Unchecked="CameraToggleButton_Unchecked"/>
+                </StackPanel>
+                <Viewbox HorizontalAlignment="Center">
+                    <Grid Name="CompositeImage">
+                        <Image Source="{Binding ImageSource}" Stretch="Fill" />
+                    </Grid>
+                </Viewbox>
             </StackPanel>
             
-            <Viewbox Grid.Row="1" HorizontalAlignment="Center">
-                <Grid Name="CompositeImage">
-                    <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
-                </Grid>
-            </Viewbox>
 
             <StackPanel  Grid.Row="2" Orientation="Horizontal">
                 <StatusBar HorizontalAlignment="Left" Name="statusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">

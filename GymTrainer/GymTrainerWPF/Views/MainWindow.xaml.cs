@@ -78,7 +78,7 @@ namespace GymTrainerWPF
             int index = this.ExerciseList.SelectedIndex;
             if (index < 0)
                 return;
-            viewModel.SelectExercise(this.ExerciseList.SelectedIndex);
+            //viewModel.SelectExercise(this.ExerciseList.SelectedIndex);
         }
 
         private void VideoControl_MediaOpened(object sender, RoutedEventArgs e)
@@ -124,6 +124,18 @@ namespace GymTrainerWPF
             }
         }
 
-        
+        private async void CameraToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            await viewModel.OpenCamera();
+        }
+
+        private void CameraToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            viewModel.CloseCamera();
+        }
+
+
     }
 }
