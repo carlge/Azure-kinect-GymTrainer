@@ -22,6 +22,8 @@ using System.Diagnostics;
 using Frame = Microsoft.Azure.Kinect.BodyTracking.Frame;
 using GymTrainerWPF.Model;
 using GymTrainerWPF.ViewModels;
+using Syncfusion.UI.Xaml.Charts;
+using GymTrainerWPF.Views;
 
 namespace GymTrainerWPF
 {
@@ -43,6 +45,8 @@ namespace GymTrainerWPF
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            Report P = new Report();
+            P.Show();
         }
 
         /// <summary>
