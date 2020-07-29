@@ -19,11 +19,6 @@ namespace GymTrainerWPF.ViewModels
     public partial class GymTrainerViewModel : ViewModelBase
     {
         /// <summary>
-        /// Azure Kinect sensor
-        /// </summary>
-        private Device _kinect = null;
-
-        /// <summary>
         /// The width in pixels of the color image from the Azure Kinect DK
         /// </summary>
         private int _colorWidth = 1920;
@@ -38,22 +33,26 @@ namespace GymTrainerWPF.ViewModels
         /// </summary>
         private string _statusText = null;
 
+        private string _workoutTime = "00:00:00";
+
+        private string _systemMode = "Free";
+
+        private int _totalReps = 15;
+        private int _currentReps = 0;
         /// <summary>
         /// Bitmap to display
         /// </summary>
         private WriteableBitmap _bitmap = null;
 
-        private int imageSerial = 0;
+        private string _workoutWarning = "Cannot be detected by camera!";
 
-        private List<List<Vector3>> jointsList = new List<List<Vector3>>();
+        //private List<List<Vector3>> jointsList = new List<List<Vector3>>();
 
         private object lockObject = new object();
-        /// <summary>
-        /// Status of the application
-        /// </summary>
 
-        private bool running = true;
+        private Uri _videoSource = new Uri("Videos/bicepcurl.mp4", UriKind.Relative);
 
+        IExerciseMotion exerciseMotion = null;
         /// <summary>
         /// Gets the bitmap to display
         /// </summary>
@@ -85,6 +84,111 @@ namespace GymTrainerWPF.ViewModels
             }
         }
 
+        public string SystemMode
+        {
+            get
+            {
+                return this._systemMode;
+            }
+
+            set
+            {
+                if (this._systemMode != value)
+                {
+                    this._systemMode = value;
+                    OnPropertyChanged("SystemMode");
+                }
+            }
+        }
+
+        public string WorkOutTime
+        {
+            get
+            {
+                return this._workoutTime;
+            }
+
+            set
+            {
+                if (this._workoutTime != value)
+                {
+                    this._workoutTime = value;
+                    OnPropertyChanged("WorkOutTime");
+                }
+            }
+        }
+
+        public string WorkoutWarning
+        {
+            get
+            {
+                return this._workoutWarning;
+            }
+
+            set
+            {
+                if (this._workoutWarning != value)
+                {
+                    this._workoutWarning = value;
+                    OnPropertyChanged("WorkoutWarning");
+                }
+            }
+        }
+        
+
+        public int CurrentReps
+        {
+            get
+            {
+                return this._currentReps;
+            }
+
+            set
+            {
+                if (this._currentReps != value)
+                {
+                    this._currentReps = value;
+                    OnPropertyChanged("CurrentReps");
+                }
+            }
+        }
+
+        public int TotalReps
+        {
+            get
+            {
+                return this._totalReps;
+            }
+
+            set
+            {
+                if (this._totalReps != value)
+                {
+                    this._totalReps = value;
+                    OnPropertyChanged("TotalReps");
+                }
+            }
+        }
+
+
+
+        public Uri VideoSource
+        {
+            get
+            {
+                return this._videoSource;
+            }
+
+            set
+            {
+                if (this._videoSource != value)
+                {
+                    this._videoSource = value;
+                    OnPropertyChanged("VideoSource");
+                }
+            }
+        } 
+
         /// <summary>
         /// Gets/sets collection of cameras
         /// </summary>
@@ -95,6 +199,8 @@ namespace GymTrainerWPF.ViewModels
 
         public GymTrainerViewModel() 
         {
+            // Open the default device
+            this._kinect = Device.Open();
             this._bitmap = new WriteableBitmap(_colorWidth, _colorHeight, 96.0, 96.0, PixelFormats.Bgra32, null);
             var exercises = Configuration.LoadExercise();
             foreach (var exercise in exercises)
@@ -103,23 +209,7 @@ namespace GymTrainerWPF.ViewModels
             }
         }
 
-        private void OpenCamera() 
-        {
-            // Open the default device
-            this._kinect = Device.Open();
-
-            // Configure camera modes
-            this._kinect.StartCameras(new DeviceConfiguration
-            {
-                CameraFPS = FPS.FPS15,
-                ColorFormat = ImageFormat.ColorBGRA32,
-                ColorResolution = ColorResolution.R1080p,
-                DepthMode = DepthMode.NFOV_Unbinned,
-                SynchronizedImagesOnly = true
-            });
-        }
-
-        public void CloseCamera() 
+        ~GymTrainerViewModel() 
         {
             if (this._kinect != null)
             {
@@ -163,80 +253,22 @@ namespace GymTrainerWPF.ViewModels
             {
                 string fileName = DateTime.Now.ToString("dd_MM_HH_mm_ss");
                 SkeletonCSVExport skeletonCSVExport = new SkeletonCSVExport();
-                skeletonCSVExport.Write(fileName + ".csv", jointsList);
+                //skeletonCSVExport.Write(fileName + ".csv", jointsList);
                 Process.Start("ffmpeg.exe", "-framerate 10 -i ./img/%d.jpeg -c:v libx264 -r 30 -pix_fmt yuv420p " + fileName + ".mp4");
             }
         }
 
-
-        public void OpenExerciseWindow(int exerciseIndex) 
+        public void SelectExercise(int ExerciseIndex) 
         {
-            
-        }
-
-        async Task StartAcquisition() 
-        {
-            Tracker tracker = Tracker.Create(this._kinect.GetCalibration(), new TrackerConfiguration() { ProcessingMode = TrackerProcessingMode.Gpu, SensorOrientation = SensorOrientation.Default });
-
-            while (running)
+            if (ExerciseIndex == 0) 
             {
-                using (Capture capture = await Task.Run(() => { return this._kinect.GetCapture(); }))
-                {
-                    this.StatusText = "Received Capture: " + capture.Depth.DeviceTimestamp;
-
-                    this._bitmap.Lock();
-
-                    var color = capture.Color;
-                    var region = new Int32Rect(0, 0, color.WidthPixels, color.HeightPixels);
-
-
-
-                    unsafe
-                    {
-                        using (var pin = color.Memory.Pin())
-                        {
-                            this._bitmap.WritePixels(region, (IntPtr)pin.Pointer, (int)color.Size, color.StrideBytes);
-                            var bmpSource = BitmapSource.Create(color.WidthPixels, color.HeightPixels, 96.0, 96.0, PixelFormats.Bgr32, null, color.Memory.ToArray(), color.StrideBytes);
-
-                            // JpegBitmapEncoder to save BitmapSource to file
-                            // imageSerial is the serial of the sequential image
-                            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                            encoder.Frames.Add(BitmapFrame.Create(bmpSource));
-                            using (var fs = new FileStream("./img/" + (imageSerial++) + ".jpeg", FileMode.Create, FileAccess.Write))
-                            {
-                                encoder.Save(fs);
-                            }
-
-                        }
-                    }
-
-                    this._bitmap.AddDirtyRect(region);
-                    this._bitmap.Unlock();
-
-                    tracker.EnqueueCapture(capture);
-                }
-
-                // Try getting latest tracker frame.
-                using (Frame lastFrame = tracker.PopResult(TimeSpan.Zero, throwOnTimeout: false))
-                {
-                    if (lastFrame == null)
-                        continue;
-                    lock (lockObject)
-                    {
-                        List<Vector3> joints = new List<Vector3>();
-                        for (uint i = 0; i < lastFrame.NumberOfBodies; ++i)
-                        {
-                            Skeleton skeleton = lastFrame.GetBodySkeleton(i);
-                            var bodyId = lastFrame.GetBodyId(i);
-                            for (int jointId = 0; jointId < (int)JointId.Count; ++jointId)
-                            {
-                                var joint = skeleton.GetJoint(jointId);
-                                joints.Add(joint.Position / 1000);
-                            }
-                        }
-                        jointsList.Add(joints);
-                    }
-                }
+                VideoSource = new Uri("Videos/bicepcurl.mp4", UriKind.Relative);
+                exerciseMotion = new BicepCurlMotion();
+            }
+            else if (ExerciseIndex == 1)
+            {
+                VideoSource = new Uri("Videos/squat.mp4", UriKind.Relative);
+                exerciseMotion = new BicepCurlMotion();
             }
         }
     }
