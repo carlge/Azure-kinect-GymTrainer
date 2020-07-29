@@ -7,41 +7,29 @@
         mc:Ignorable="d"
         Title="Gym Trainer Sample" 
         DataContext="{StaticResource gymTrainerViewModel}"
-        Height="600" Width="1000" >
+        Height="800" Width="1200" 
+        >
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
         <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />
         <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2" />
     </Window.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <Viewbox Grid.Row="0" HorizontalAlignment="Center">
-            <Grid Name="CompositeImage">
-                <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
-            </Grid>
-        </Viewbox>
-
-        <StackPanel  Grid.Row="1" Orientation="Horizontal">
-            <Button Content="Start" Height="40" Width="100"/>
-            <StatusBar HorizontalAlignment="Left" Name="statusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">
-                <StatusBarItem Content="{Binding StatusText}" FontFamily="Segoe UI" FontSize="18"/>
-            </StatusBar>
-        </StackPanel>
-
-        <StackPanel Grid.Row="2">
-            <ListBox Name="ExerciseList" ItemsSource="{Binding Exercises}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
-                                 BorderThickness="0" SelectionMode="Single">
+        <GroupBox Header="Exercise" Grid.Column="0" >
+            <ListBox Name="ExerciseList" Width="100" ItemsSource="{Binding Exercises}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                                 BorderThickness="0" SelectionMode="Single" SelectedIndex="0" SelectionChanged="ExerciseList_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="5" BorderThickness="1" BorderBrush="{Binding Color}" Padding="5" >
-                            <Grid Width="275" Height="275" ToolTip="{Binding ExerciseName}">
+                        <Border Margin="5" BorderThickness="1" Padding="5" >
+                            <Grid Width="50" Height="50" ToolTip="{Binding ExerciseName}">
                                 <StackPanel>
-                                    <Image Source="{Binding ExerciseImageSource}"/>
+                                    <Image Source="{Binding ExerciseImageSource, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -53,6 +41,83 @@
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
             </ListBox>
-        </StackPanel>
-    </Grid>
+        </GroupBox>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Border Margin="5" BorderThickness="1" Padding="20" Grid.Row="0">
+                <MediaElement Name="VideoControl" Width="400" LoadedBehavior="Manual" UnloadedBehavior="Stop" Stretch="Fill" MediaOpened="VideoControl_MediaOpened" MediaEnded="VideoControl_MediaEnded" Source="{Binding VideoSource}" />
+            </Border>
+            <Border Height="50" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="25" BorderThickness="1" Grid.Row="0" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Reps : "  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CurrentReps}" Width ="30"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="/"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding TotalReps}" Width ="30"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="1">
+                <Button x:Name="MediaStartBtn" Content="Start" Height="40" Width="100" Click="MediaStartBtn_Click"/>
+                <Button x:Name="MediaPauseBtn" Content="Pause" Height="40" Width="100" Margin="20, 0, 0, 0" Click="MediaPauseBtn_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Margin="5" Padding="20" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="top" Grid.Row="0" >
+                <Viewbox>
+                    <Grid Name="CompositeImage">
+                        <Image Source="{Binding ImageSource}" Stretch="Fill" />
+                    </Grid>
+                </Viewbox>
+            </Border>
+            <Border Margin="25" BorderThickness="1" VerticalAlignment="top" Grid.Row="0" >
+                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="top" HorizontalAlignment="Right">
+                    <Border Height="50">
+                        <TextBlock Text="Camera"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
+                    </Border>
+                    <ToggleButton Name="CameraToggleButton" Width="100" Height="50" Checked="CameraToggleButton_Checked" Unchecked="CameraToggleButton_Unchecked"/>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Grid.Row="1">
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding StatusText}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="System Mode: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding SystemMode}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Workout Warning: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding WorkoutWarning}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="red"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="WorkOut Time: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding WorkOutTime}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+                <Border Height="50">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Calories: "  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                        <TextBlock Text="{Binding WorkOutCalories}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+     </Grid>
 </Window>

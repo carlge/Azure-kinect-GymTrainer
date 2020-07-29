@@ -43,6 +43,8 @@ namespace GymTrainerWPF
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            viewModel.TurnOnMedia += StartMedia;
         }
 
         /// <summary>
@@ -55,9 +57,9 @@ namespace GymTrainerWPF
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        private async void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-      
+
         }
 
         /// <summary>
@@ -70,6 +72,97 @@ namespace GymTrainerWPF
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyname));
             }
+        }
+
+        private void ExerciseList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            int index = this.ExerciseList.SelectedIndex;
+            if (index < 0)
+                return;
+            viewModel.SelectExercise(this.ExerciseList.SelectedIndex);
+        }
+
+        private void VideoControl_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            VideoControl.ScrubbingEnabled = true;
+            VideoControl.Play();
+            VideoControl.Pause();
+        }
+
+        private void VideoControl_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            if (viewModel.CurrentReps < viewModel.TotalReps)
+            {
+                VideoControl.Position = TimeSpan.Zero;
+                VideoControl.Play();
+                viewModel.CurrentReps++;
+                return;
+            }
+            StopMedia();
+        }
+
+        private void MediaStartBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            if ((string)MediaStartBtn.Content == "Start")
+            {
+                if (viewModel.Running)
+                {
+                    viewModel.SystemMode = "Preparing";
+                    return;
+                }
+                StartMedia();
+            }
+            else
+            {
+                StopMedia();
+            }
+        }
+        private void StopMedia()
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            VideoControl.Stop();
+            MediaStartBtn.Content = "Start";
+            MediaPauseBtn.Content = "Pause";
+            viewModel.CurrentReps = 0;
+            viewModel.SystemMode = "Free";
+        }
+
+        private void StartMedia()
+        {
+            Thread.Sleep(1000);
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            VideoControl.Play();
+            MediaStartBtn.Content = "Stop";
+            viewModel.CurrentReps++;
+        }
+
+        private void MediaPauseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if ((string)MediaPauseBtn.Content == "Pause")
+            {
+                VideoControl.Pause();
+                MediaPauseBtn.Content = "Resume";
+            }
+            else
+            {
+                VideoControl.Play();
+                MediaPauseBtn.Content = "Pause";
+            }
+        }
+
+        private async void CameraToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            await viewModel.OpenCamera();
+        }
+
+        private async void CameraToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var viewModel = this.DataContext as GymTrainerViewModel;
+            await viewModel.CloseCamera();
         }
     }
 }
