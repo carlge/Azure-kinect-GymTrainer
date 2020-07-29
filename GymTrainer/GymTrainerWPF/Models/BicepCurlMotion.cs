@@ -38,7 +38,13 @@ namespace GymTrainerWPF.Models
             float torso = (neck2hipleft + neck2hipright) / (float)2.0;
 
             //Norm
+            Vector3 shoulder2Elbow = Vector3.Subtract(jointsPos[3], jointsPos[2]);
+            Vector3 neck2Pelvis = Vector3.Subtract(jointsPos[0], jointsPos[1]);
 
+            float angleSN = Angle(shoulder2Elbow, neck2Pelvis);
+
+            if (angleSN > 20)
+                return "Please ensure your elbows remain stationary and to the sides of your body";
 
             return "success";
         }

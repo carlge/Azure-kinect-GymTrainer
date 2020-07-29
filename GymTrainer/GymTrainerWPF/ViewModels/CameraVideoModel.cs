@@ -140,7 +140,7 @@ namespace GymTrainerWPF.ViewModels
                                 }
                                 else if((SystemMode == "Prepared"))
                                 {
-                                    
+                                    WorkoutWarning = exerciseMotion.analyze(skeleton);
                                 }
                                 
                             }
