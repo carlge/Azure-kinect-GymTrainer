@@ -45,6 +45,10 @@ namespace GymTrainerWPF
         {
             var viewModel = this.DataContext as GymTrainerViewModel;
             viewModel.TurnOnMedia += StartMedia;
+
+            VideoControl.ScrubbingEnabled = true;
+            VideoControl.Play();
+            VideoControl.Pause();
         }
 
         /// <summary>
@@ -132,7 +136,10 @@ namespace GymTrainerWPF
 
         private void StartMedia()
         {
-            Thread.Sleep(1000);
+            Task.Factory.StartNew(() =>
+            {
+                Thread.Sleep(1000);
+            });
             var viewModel = this.DataContext as GymTrainerViewModel;
             VideoControl.Play();
             MediaStartBtn.Content = "Stop";
@@ -163,6 +170,11 @@ namespace GymTrainerWPF
         {
             var viewModel = this.DataContext as GymTrainerViewModel;
             await viewModel.CloseCamera();
+        }
+
+        private void ReporteBtn_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
