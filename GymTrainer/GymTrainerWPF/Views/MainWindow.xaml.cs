@@ -57,7 +57,7 @@ namespace GymTrainerWPF
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private async void MainWindow_Closing(object sender, CancelEventArgs e)
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
 
         }
