@@ -44,8 +44,6 @@ namespace GymTrainerWPF.ViewModels
         /// </summary>
         private WriteableBitmap _bitmap = null;
 
-        private int imageSerial = 0;
-
         private string _workoutWarning = "Cannot be detected by camera!";
 
         //private List<List<Vector3>> jointsList = new List<List<Vector3>>();
