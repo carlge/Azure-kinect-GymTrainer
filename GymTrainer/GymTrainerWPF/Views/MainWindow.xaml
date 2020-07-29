@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Gym Trainer Sample" 
         DataContext="{StaticResource gymTrainerViewModel}"
-        Height="600" Width="1000" >
+        Height="800" Width="1200" 
+        >
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e" />
         <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f" />
@@ -20,12 +21,12 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
+        <GroupBox Header="Exercise" Grid.Column="0" >
             <ListBox Name="ExerciseList" Width="100" ItemsSource="{Binding Exercises}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
-                                 BorderThickness="0" SelectionMode="Single" SelectionChanged="ExerciseList_SelectionChanged">
+                                 BorderThickness="0" SelectionMode="Single" SelectedIndex="0" SelectionChanged="ExerciseList_SelectionChanged">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="5" BorderThickness="1" BorderBrush="{Binding Color}" Padding="5" >
+                        <Border Margin="5" BorderThickness="1" Padding="5" >
                             <Grid Width="50" Height="50" ToolTip="{Binding ExerciseName}">
                                 <StackPanel>
                                     <Image Source="{Binding ExerciseImageSource, UpdateSourceTrigger=PropertyChanged}"/>
@@ -40,27 +41,43 @@
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
             </ListBox>
-        </Grid>
+        </GroupBox>
 
         <Grid Grid.Column="1">
-            <StackPanel>
-                <MediaElement Name="VideoControl"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Border Margin="5" BorderThickness="1" Padding="50" Grid.Row="0">
+                <MediaElement Name="VideoControl" Width="600" LoadedBehavior="Manual" UnloadedBehavior="Stop" Stretch="Fill" MediaOpened="VideoControl_MediaOpened" MediaEnded="VideoControl_MediaEnded" Source="{Binding VideoSource}" />
+            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="1">
+                <Button x:Name="MediaStartBtn" Content="Start" Height="40" Width="100" Click="MediaStartBtn_Click"/>
+                <Button x:Name="MediaPauseBtn" Content="Pause" Height="40" Width="100" Margin="20, 0, 0, 0" Click="MediaPauseBtn_Click" />
             </StackPanel>
         </Grid>
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Viewbox Grid.Row="0" HorizontalAlignment="Center">
+
+            <StackPanel Grid.Row="0">
+                <StatusBar HorizontalAlignment="Left" Name="ExerciseStatusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">
+                    <StatusBarItem Content="{Binding WorkOutTime}" FontFamily="Segoe UI" FontSize="18" Margin="5"/>
+                    <StatusBarItem Content="{Binding RepsCount}" FontFamily="Segoe UI" FontSize="18" Margin="5"/>
+                </StatusBar>
+            </StackPanel>
+            
+            <Viewbox Grid.Row="1" HorizontalAlignment="Center">
                 <Grid Name="CompositeImage">
                     <Image Source="{Binding ImageSource}" Stretch="UniformToFill" />
                 </Grid>
             </Viewbox>
 
-            <StackPanel  Grid.Row="1" Orientation="Horizontal">
-                <Button Content="Start" Height="40" Width="100"/>
+            <StackPanel  Grid.Row="2" Orientation="Horizontal">
                 <StatusBar HorizontalAlignment="Left" Name="statusBar" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}">
                     <StatusBarItem Content="{Binding StatusText}" FontFamily="Segoe UI" FontSize="18"/>
                 </StatusBar>

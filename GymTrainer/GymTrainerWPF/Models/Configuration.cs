@@ -35,7 +35,10 @@ namespace GymTrainerWPF.Models
 			exercises.Add(new Exercise() {ExerciseName = "Bicep Curl", ExerciseImageSource =LoadBitmapImage(@"Images\bicepcurl.jpg") });
 			exercises.Add(new Exercise() { ExerciseName = "Squat", ExerciseImageSource = LoadBitmapImage(@"Images\squat.jpg") });
 			exercises.Add(new Exercise() { ExerciseName = "Plank", ExerciseImageSource = LoadBitmapImage(@"Images\plank.jpg") });
-
+			exercises.Add(new Exercise() { ExerciseName = "Deadlift", ExerciseImageSource = LoadBitmapImage(@"Images\deadlift.jpg") });
+			exercises.Add(new Exercise() { ExerciseName = "Crunch", ExerciseImageSource = LoadBitmapImage(@"Images\crunch.jpg") });
+			exercises.Add(new Exercise() { ExerciseName = "Jumping Jack", ExerciseImageSource = LoadBitmapImage(@"Images\jumpjack.jpg") });
+			exercises.Add(new Exercise() { ExerciseName = "Shoulder Press", ExerciseImageSource = LoadBitmapImage(@"Images\shoulderpress.jpg") });
 			return exercises;
 		}
 	}

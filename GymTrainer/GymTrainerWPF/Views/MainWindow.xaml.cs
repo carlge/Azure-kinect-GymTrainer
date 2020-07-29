@@ -78,7 +78,52 @@ namespace GymTrainerWPF
             int index = this.ExerciseList.SelectedIndex;
             if (index < 0)
                 return;
-            viewModel.OpenExerciseWindow(this.ExerciseList.SelectedIndex);
+            viewModel.SelectExercise(this.ExerciseList.SelectedIndex);
         }
+
+        private void VideoControl_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            VideoControl.ScrubbingEnabled = true;
+            VideoControl.Play();
+            VideoControl.Pause();
+        }
+
+        private void VideoControl_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            VideoControl.Stop();
+            MediaStartBtn.Content = "Start";
+            MediaPauseBtn.Content = "Pause";
+        }
+
+        private void MediaStartBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if ((string)MediaStartBtn.Content == "Start")
+            {
+                VideoControl.Play();
+                MediaStartBtn.Content = "Stop";
+            }
+            else 
+            {
+                VideoControl.Stop();
+                MediaStartBtn.Content = "Start";
+                MediaPauseBtn.Content = "Pause";
+            }
+        }
+
+        private void MediaPauseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if ((string)MediaPauseBtn.Content == "Pause")
+            {
+                VideoControl.Pause();
+                MediaPauseBtn.Content = "Resume";
+            }
+            else
+            {
+                VideoControl.Play();
+                MediaPauseBtn.Content = "Pause";
+            }
+        }
+
+        
     }
 }

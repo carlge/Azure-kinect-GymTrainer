@@ -38,6 +38,10 @@ namespace GymTrainerWPF.ViewModels
         /// </summary>
         private string _statusText = null;
 
+        private string _workoutTime = "Workout Time : 00:00:00";
+
+        private string _repsCount = "Reps : 00 / 15";
+
         /// <summary>
         /// Bitmap to display
         /// </summary>
@@ -84,6 +88,47 @@ namespace GymTrainerWPF.ViewModels
                 }
             }
         }
+
+        public string WorkOutTime
+        {
+            get
+            {
+                return this._workoutTime;
+            }
+
+            set
+            {
+                if (this._workoutTime != value)
+                {
+                    this._workoutTime = value;
+                    OnPropertyChanged("WorkOutTime");
+                }
+            }
+        }
+
+        public string RepsCount
+        {
+            get
+            {
+                return this._repsCount;
+            }
+
+            set
+            {
+                if (this._repsCount != value)
+                {
+                    this._repsCount = value;
+                    OnPropertyChanged("RepsCount");
+                }
+            }
+        }
+
+
+
+        public string VideoSource
+        {
+            get; set;
+        } = "Videos/bicepcurl.mp4";
 
         /// <summary>
         /// Gets/sets collection of cameras
@@ -169,7 +214,7 @@ namespace GymTrainerWPF.ViewModels
         }
 
 
-        public void OpenExerciseWindow(int exerciseIndex) 
+        public void SelectExercise(int exerciseIndex) 
         {
             
         }
