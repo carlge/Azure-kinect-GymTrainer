@@ -42,9 +42,9 @@ namespace GymTrainerWPF.Models
                 jointsPos.Add(joint.Position / 1000);
             }
 
-            float neck2hipleft = Vector3.Distance(jointsPos[0], jointsPos[5]);
-            float neck2hipright = Vector3.Distance(jointsPos[0], jointsPos[6]);
-            float torso = (neck2hipleft + neck2hipright) / (float)2.0;
+            //float neck2hipleft = Vector3.Distance(jointsPos[0], jointsPos[5]);
+            //float neck2hipright = Vector3.Distance(jointsPos[0], jointsPos[6]);
+            //float torso = (neck2hipleft + neck2hipright) / (float)2.0;
 
             //Norm
             Vector3 shoulder2Elbow = Vector3.Subtract(jointsPos[3], jointsPos[2]);

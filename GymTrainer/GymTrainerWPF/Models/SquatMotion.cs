@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Kinect.BodyTracking;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace GymTrainerWPF.Models
@@ -9,9 +10,14 @@ namespace GymTrainerWPF.Models
     {
         //0 JointId.KneeRight, 1 JointId.KneeLeft, 2 JointId.HipRight, 3 JointId.HipLeft, 4 JointId.AnkleRight, 5 JointId.AnkleLeft, 6 JointId.ShoulderLeft, 7 JointId.ShoulderRight
         List<JointId> keyJoints = new List<JointId> { JointId.KneeRight, JointId.KneeLeft, JointId.HipRight, JointId.HipLeft, JointId.AnkleRight, JointId.AnkleLeft, JointId.ShoulderLeft, JointId.ShoulderRight };
-        List<Vector3> jointsPos = new List<Vector3>();
+        
+
+        Queue<float> JointsQueue = new Queue<float>();
+        int status = -1;//-1 reset, 0 up, 1 down
+
         public string IsPrepared(Skeleton skeleton)
         {
+            List<Vector3> jointsPos = new List<Vector3>();
             foreach (var jointId in keyJoints)
             {
                 var joint = skeleton.GetJoint(jointId);
@@ -47,23 +53,48 @@ namespace GymTrainerWPF.Models
         public AnalysisResult analyze(Skeleton skeleton)
         {
             AnalysisResult analysisResult = new AnalysisResult() { WarningMessage = "success", Status = RapStatus.NotReady };
+
+            List<Vector3> jointsPos = new List<Vector3>();
+            foreach (var jointId in keyJoints)
+            {
+                var joint = skeleton.GetJoint(jointId);
+                jointsPos.Add(joint.Position / 1000);
+            }
             // For a complete rep, the knee-hip and ankle-knee angle should start close to 180 deg and reach to about 90+-10 degrees
             // calculate the dot product of knee-hip and ankle-knee 1-2
             Vector3 rightKneeHip = Vector3.Subtract(jointsPos[0], jointsPos[2]);
             Vector3 leftKneeHip = Vector3.Subtract(jointsPos[1], jointsPos[3]);
+
             Vector3 rightAnkleKnee = Vector3.Subtract(jointsPos[4], jointsPos[0]);
             Vector3 leftAnkleKnee = Vector3.Subtract(jointsPos[5], jointsPos[1]);
+
             float rightAngle = Angle(rightKneeHip, rightAnkleKnee);
             float leftAngle = Angle(leftKneeHip, leftAnkleKnee);
 
-            if (leftAngle < 80 || rightAngle < 80)
+            //if (leftAngle < 80 || rightAngle < 80)
+            //{
+            //    analysisResult.WarningMessage =  "Too Shallow";
+            //}
+            //else if (leftAngle > 100 || rightAngle > 100)
+            //{
+            //    analysisResult.WarningMessage = "Too Deep";
+            //}
+            float averageAngle = (rightAngle + leftAngle) / (float)2.0;
+            JointsQueue.Enqueue(averageAngle);
+            if (JointsQueue.Count > 5)
+                JointsQueue.Dequeue();
+
+            if (averageAngle > 100 && averageAngle > JointsQueue.Average() && status != 0)
             {
-                analysisResult.WarningMessage =  "Too Shallow";
+                status = 0;
             }
-            else if (leftAngle > 100 || rightAngle > 100)
+
+            if (averageAngle > 100 && averageAngle < JointsQueue.Average() && status != 1)
             {
-                analysisResult.WarningMessage = "Too Deep";
+                status = 1;
+                analysisResult.Status = RapStatus.Ready;
             }
+
             return analysisResult;
         }
 
