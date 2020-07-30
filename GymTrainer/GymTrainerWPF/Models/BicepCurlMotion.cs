@@ -54,7 +54,7 @@ namespace GymTrainerWPF.Models
             float angleSN = Angle(shoulder2Elbow, neck2Pelvis);
 
             if (angleSN > 20)
-                analysisResult.WarningMessage = "Please ensure your elbows remain stationary and to the sides of your body";
+                analysisResult.WarningMessage = "Lower your elbows, remain stationary!";
 
             float angleEW = Angle(elbow2Wrist, shoulder2Elbow);
             JointsQueue.Enqueue(angleEW);

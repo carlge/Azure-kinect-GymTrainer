@@ -51,14 +51,6 @@
             <Border Margin="5" BorderThickness="1" Padding="10" Grid.Row="0">
                 <MediaElement Name="VideoControl" Width="400" LoadedBehavior="Manual" UnloadedBehavior="Stop" Stretch="Fill" MediaOpened="VideoControl_MediaOpened" MediaEnded="VideoControl_MediaEnded" Source="{Binding VideoSource}" />
             </Border>
-            <Border Height="50" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="25" BorderThickness="1" Grid.Row="0" >
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Reps : "  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center" Background="Transparent"/>
-                    <TextBlock Text="{Binding CurrentReps}" Width ="30"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center" Background="Transparent" />
-                    <TextBlock Text="/"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center" Background="Transparent" />
-                    <TextBox Text="{Binding TotalReps}" Width ="30"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center" Background="Transparent"/>
-                </StackPanel>
-            </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1">
                 <Button x:Name="MediaStartBtn" Content="Start" Height="40" Width="100" Click="MediaStartBtn_Click"/>
                 <Button x:Name="MediaPauseBtn" Content="Pause" Height="40" Width="100" Margin="30, 0, 0, 0" Click="MediaPauseBtn_Click" />
@@ -68,18 +60,27 @@
 
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Border Margin="5" Padding="10" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="top" Grid.Row="0" >
+            <Border Height="80" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25" BorderThickness="1" Grid.Row="0" >
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Reps : "  FontFamily="Segoe UI" FontSize="40" VerticalAlignment="Center" Background="Transparent"/>
+                    <TextBlock Text="{Binding CurrentReps}" Width ="30"  FontFamily="Segoe UI" FontSize="40" VerticalAlignment="Center" Background="Transparent" />
+                    <TextBlock Text="/"  FontFamily="Segoe UI" FontSize="40" VerticalAlignment="Center" Background="Transparent" />
+                    <TextBox Text="{Binding TotalReps}" Width ="50"  FontFamily="Segoe UI" FontSize="40" VerticalAlignment="Center" Background="Transparent"/>
+                </StackPanel>
+            </Border>
+            <Border Margin="5" Padding="10" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="top" Grid.Row="1" >
                 <Viewbox>
                     <Grid Name="CompositeImage">
                         <Image Source="{Binding ImageSource}" Stretch="Fill" />
                     </Grid>
                 </Viewbox>
             </Border>
-            <Border Margin="25" BorderThickness="1" VerticalAlignment="top" Grid.Row="0" >
+            <Border Margin="25" BorderThickness="1" VerticalAlignment="top" Grid.Row="1" >
                 <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="top" HorizontalAlignment="Right">
                     <Border Height="50">
                         <TextBlock Text="Camera"  FontFamily="Segoe UI" FontSize="18" VerticalAlignment="Center"/>
@@ -88,7 +89,7 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Row="1">
+            <StackPanel Grid.Row="2">
                 <Border Height="50">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding StatusText}"  FontFamily="Century Gothic" FontSize="20" VerticalAlignment="Center" Background="Transparent" Foreground="{StaticResource MediumGreyBrush}"/>
